@@ -1,0 +1,14 @@
+## Interface: 90020
+## Title: SoulbindTalents
+## Version: 0.1b
+## Author: jokair9
+## Notes: Include Soulbinds in the Player Talent Frame.
+
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceHook-3.0\AceHook-3.0.xml
+#@end-no-lib-strip@
+
+SoulbindTalents.lua
