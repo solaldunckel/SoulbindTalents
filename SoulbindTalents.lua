@@ -129,7 +129,7 @@ function SoulbindTalents:AppendSoulbindFrame()
 	SoulbindViewer.BackgroundBlackOverlay:SetDrawLayer("BACKGROUND", -1)
 
 	SoulbindViewer.ActivateSoulbindButton:ClearAllPoints()
-	SoulbindViewer.ActivateSoulbindButton:SetPoint("BOTTOM", SoulbindViewer, "BOTTOM", -93, 15)
+	SoulbindViewer.ActivateSoulbindButton:SetPoint("BOTTOM", SoulbindViewer, "BOTTOM", -90, 15)
 
 	SoulbindViewer.SelectGroup:ClearAllPoints()
 	SoulbindViewer.SelectGroup:SetPoint("LEFT", SoulbindViewer, "LEFT", 15, 0)
@@ -410,6 +410,12 @@ function SoulbindTalents:ADDON_LOADED(_, addon)
 			PlayerTalentFrameTab4:SetPoint("LEFT", self.petTab and PlayerTalentFrameTab3 or PlayerTalentFrameTab2, "RIGHT", -15, 0)
 			PlayerTalentFrameTab4:SetText("Soulbinds")
 			PlayerTalentFrameTab4:SetID(SOULBIND_TAB)
+
+			if ElvUI then
+				local Engine = unpack(ElvUI)
+				Engine:GetModule('Skins'):HandleTab(PlayerTalentFrameTab4)
+				SoulbindViewer.backdrop:Hide()
+			end
 
 			self.soulbindID = C_Soulbinds.GetActiveSoulbindID();
 			PlayerTalentFrameTab4:SetShown(self.soulbindID ~= 0 and true or false)
