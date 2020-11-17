@@ -12,7 +12,7 @@ SoulbindTalents = LibStub("AceAddon-3.0"):NewAddon(SoulbindTalents, "SoulbindTal
 LibStub("AceEvent-3.0"):Embed(SoulbindTalents)
 LibStub("AceHook-3.0"):Embed(SoulbindTalents)
 
-SOULBIND_TAB = 4
+local SOULBIND_TAB = 4
 
 local CONDUIT_RANKS = {
 	[1] = C_Soulbinds.GetConduitItemLevel(0, 1),
@@ -129,7 +129,7 @@ function SoulbindTalents:AppendSoulbindFrame()
 	SoulbindViewer.BackgroundBlackOverlay:SetDrawLayer("BACKGROUND", -1)
 
 	SoulbindViewer.ActivateSoulbindButton:ClearAllPoints()
-	SoulbindViewer.ActivateSoulbindButton:SetPoint("BOTTOM", SoulbindViewer, "BOTTOM", -90, 15)
+	SoulbindViewer.ActivateSoulbindButton:SetPoint("BOTTOM", SoulbindViewer, "BOTTOM", -93, 15)
 
 	SoulbindViewer.SelectGroup:ClearAllPoints()
 	SoulbindViewer.SelectGroup:SetPoint("LEFT", SoulbindViewer, "LEFT", 15, 0)
@@ -191,13 +191,11 @@ function SoulbindTalents:ShowSoulbindsTab()
 		SoulbindViewer:Show();
 	end
 
-	PlayerTalentFrameSoulbind:Show()
 	PlayerTalentFrame:SetTitle("Soulbinds")
 	PlayerTalentFrame:SetHeight(588)
 end
 
 function SoulbindTalents:HideSoulbindsTab()
-	PlayerTalentFrameSoulbind:Hide()
 	if SoulbindViewer:IsShown() then
 		SoulbindViewer:Hide();
 		ItemButtonUtil.TriggerEvent(ItemButtonUtil.Event.ItemContextChanged);
@@ -213,6 +211,34 @@ function SoulbindTalents:HideSoulbindsTab()
 end
 
 function SoulbindTalents:PlayerTalentFrame_Refresh()
+	if not self.created then
+		if InCombatLockdown() then return end
+
+		local _, playerClass = UnitClass("player");
+		if (playerClass == "HUNTER") then
+			self.petTab = true
+		end
+
+		local PlayerTalentFrameTab4 = CreateFrame("Button", "$parentTab4", PlayerTalentFrame, "PlayerTalentTabTemplate")
+		PlayerTalentFrameTab4:SetPoint("LEFT", self.petTab and PlayerTalentFrameTab3 or PlayerTalentFrameTab2, "RIGHT", -15, 0)
+		PlayerTalentFrameTab4:SetText("Soulbinds")
+		PlayerTalentFrameTab4:SetID(SOULBIND_TAB)
+
+		PanelTemplates_SetNumTabs(PlayerTalentFrame, 4)
+
+		local PlayerTalentFrameSoulbind = CreateFrame("Frame", "PlayerTalentFrameSoulbind", PlayerTalentFrame)
+		PlayerTalentFrameSoulbind:SetFrameLevel(1)
+		PlayerTalentFrameSoulbind:SetPoint("TOPLEFT", PlayerTalentFrameInset)
+		PlayerTalentFrameSoulbind:SetPoint("BOTTOMRIGHT", PlayerTalentFrameInset)
+
+		if ElvUI then
+			local Engine = unpack(ElvUI)
+			Engine:GetModule('Skins'):HandleTab(PlayerTalentFrameTab4)
+		end
+
+		self.created = true
+	end
+
 	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
 
 	if (selectedTab == TALENTS_TAB) then
@@ -231,6 +257,7 @@ function SoulbindTalents:PlayerTalentFrame_Refresh()
 		PlayerTalentFrame_HidePetSpecTab();
 		self:ShowSoulbindsTab();
 		PlayerTalentFrame_SetExpanded(true);
+		PlayerTalentFrame:SetHeight(588)
 	end
 end
 
@@ -399,38 +426,11 @@ function SoulbindTalents:ADDON_LOADED(_, addon)
 		if UIParentLoadAddOn("Blizzard_Soulbinds") then
 			self:SecureHook('PlayerTalentFrame_Refresh')
 			self:SecureHook('PlayerTalentFrame_Close')
-			self:HookScript(PlayerTalentFrame, "OnHide", "PlayerTalentFrame_OnHide")
-
-			local _, playerClass = UnitClass("player");
-			if (playerClass == "HUNTER") then
-				self.petTab = true
-			end
-
-			local PlayerTalentFrameTab4 = CreateFrame("Button", "$parentTab4", PlayerTalentFrame, "PlayerTalentTabTemplate")
-			PlayerTalentFrameTab4:SetPoint("LEFT", self.petTab and PlayerTalentFrameTab3 or PlayerTalentFrameTab2, "RIGHT", -15, 0)
-			PlayerTalentFrameTab4:SetText("Soulbinds")
-			PlayerTalentFrameTab4:SetID(SOULBIND_TAB)
-
-			if ElvUI then
-				local Engine = unpack(ElvUI)
-				Engine:GetModule('Skins'):HandleTab(PlayerTalentFrameTab4)
-				SoulbindViewer.backdrop:Hide()
-			end
-
-			self.soulbindID = C_Soulbinds.GetActiveSoulbindID();
-			PlayerTalentFrameTab4:SetShown(self.soulbindID ~= 0 and true or false)
-
-			PanelTemplates_SetNumTabs(PlayerTalentFrame, 4)
-
-			local PlayerTalentFrameSoulbind = CreateFrame("Frame", "PlayerTalentFrameSoulbind", PlayerTalentFrame)
-			PlayerTalentFrameSoulbind:SetFrameLevel(1)
-			PlayerTalentFrameSoulbind:SetPoint("TOPLEFT", PlayerTalentFrameInset)
-			PlayerTalentFrameSoulbind:SetPoint("BOTTOMRIGHT", PlayerTalentFrameInset)
-			PlayerTalentFrameSoulbind:Hide()
+			self:SecureHookScript(PlayerTalentFrame, "OnHide", "PlayerTalentFrame_OnHide")
 		end
 	elseif addon == "Blizzard_Soulbinds" then
 		if UIParentLoadAddOn("Blizzard_TalentUI") then
-			self:Hook(SoulbindViewer, "Open", "SoulbindViewer_OnOpen", true)
+			self:SecureHook(SoulbindViewer, "Open", "SoulbindViewer_OnOpen")
 			self:SecureHook(ConduitListConduitButtonMixin, "Init", "ConduitRank")
 			self:SecureHook(SoulbindViewer, "SetSheenAnimationsPlaying", "AnimationFX")
 			self:SecureHook(SoulbindTreeNodeLinkMixin, "SetState", "NodeFX")
