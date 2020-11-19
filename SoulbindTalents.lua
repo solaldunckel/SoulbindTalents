@@ -3,7 +3,8 @@ local _, SoulbindTalents = ...
 local defaults_settings = {
 	profile = {
 		disableFX = false,
-		conduitTooltipRank = false,
+		conduitTooltipRank = true,
+		soulbindScale = 1,
 	}
 }
 
@@ -22,6 +23,7 @@ local CONDUIT_RANKS = {
 	[5] = C_Soulbinds.GetConduitItemLevel(0, 5),
 	[6] = C_Soulbinds.GetConduitItemLevel(0, 6),
 	[7] = C_Soulbinds.GetConduitItemLevel(0, 7),
+	[8] = C_Soulbinds.GetConduitItemLevel(0, 8),
 }
 
 function SoulbindTalents:OnEnable()
@@ -30,17 +32,18 @@ function SoulbindTalents:OnEnable()
 
 	self:SetupOptions()
 
-	self:RegisterEvent("SOULBIND_FORGE_INTERACTION_ENDED")
-	self:RegisterEvent("SOULBIND_ACTIVATED")
 	self:RegisterEvent("ADDON_LOADED")
 
 	self:SecureHookScript(GameTooltip, 'OnTooltipSetItem', 'TooltipHook')
 	self:SecureHookScript(ItemRefTooltip, 'OnTooltipSetItem', 'TooltipHook')
 	self:SecureHookScript(EmbeddedItemTooltip, 'OnTooltipSetItem', 'TooltipHook')
 
-	if self.settings.disableFX then
-		SetCVar("ShakeStrengthUI", 0)
+	local _, playerClass = UnitClass("player");
+	if (playerClass == "HUNTER") then
+		self.petTab = true
 	end
+
+	self.previousTab = 1
 end
 
 function SoulbindTalents:SetupOptions()
@@ -67,7 +70,7 @@ function SoulbindTalents:SetupOptions()
 			},
 			disableFX = {
 				name = "Disable FX",
-				desc = "Disable Shaking, Link Animations, Background Animations..",
+				desc = "Disable all FXs (Improves FPS when opened).",
 				width = "full",
 				type = "toggle",
 				order = 10,
@@ -79,6 +82,16 @@ function SoulbindTalents:SetupOptions()
 				width = "full",
 				order = 11,
 			},
+			soulbindScale = {
+				type = "range",
+				isPercent = true,
+				name = "Soulbind Frame Scale",
+				desc = "Set the scale of the Soulbind Frame",
+				min = 0.5,
+				max = 1.5,
+				step = 0.05,
+				order = 12,
+			},
 		}
 	}
 
@@ -86,211 +99,130 @@ function SoulbindTalents:SetupOptions()
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SoulbindTalents", "SoulbindTalents")
 end
 
-function SoulbindTalents:AppendSoulbindFrame()
-	SoulbindViewer:SetParent(PlayerTalentFrameSoulbind)
-	SoulbindViewer:SetScale(0.85)
-
-	SoulbindViewer:ClearAllPoints()
-	SoulbindViewer:SetPoint("TOPLEFT", PlayerTalentFrameSoulbind)
-	SoulbindViewer:SetPoint("BOTTOMRIGHT", PlayerTalentFrameSoulbind)
-
-	SoulbindViewer.CloseButton:Hide()
-	SoulbindViewer.Border:Hide()
-	SoulbindViewer.ShadowTop:Hide()
-	SoulbindViewer.ShadowLeft:Hide()
-	SoulbindViewer.ShadowBottom:Hide()
-	SoulbindViewer.ShadowRight:Hide()
-
-	SoulbindViewer.Background:ClearAllPoints()
-	SoulbindViewer.Background:SetParent(PlayerTalentFrameSoulbind)
-	SoulbindViewer.Background:SetDrawLayer("BACKGROUND", -1)
-	SoulbindViewer.Background:SetPoint("TOPLEFT", PlayerTalentFrameSoulbind)
-	SoulbindViewer.Background:SetPoint("BOTTOMRIGHT", PlayerTalentFrameSoulbind)
-
-	SoulbindViewer.ConduitList.ScrollBar:ClearAllPoints()
-	SoulbindViewer.ConduitList.ScrollBar:SetPoint("TOPRIGHT", SoulbindViewer.ConduitList, -6, 0)
-	SoulbindViewer.ConduitList.ScrollBar:SetPoint("BOTTOMRIGHT", SoulbindViewer.ConduitList, -6, 0)
-
-	if self.settings.disableFX then
-		SoulbindViewer.Fx:Hide()
-		SoulbindViewer:SetSheenAnimationsPlaying(false)
-	end
-
-	SoulbindViewer.ActivateFX:ClearAllPoints()
-	SoulbindViewer.ActivateFX:SetPoint("TOPLEFT", SoulbindViewer, "TOPLEFT", 197, -22)
-
-	SoulbindViewer.ActivateFX2:ClearAllPoints()
-	SoulbindViewer.ActivateFX2:SetPoint("TOPLEFT", SoulbindViewer, "TOPLEFT", 197, -22)
-
-	SoulbindViewer.Background2:ClearAllPoints()
-	SoulbindViewer.Background2:SetParent(PlayerTalentFrameSoulbind)
-
-	SoulbindViewer.BackgroundBlackOverlay:SetParent(PlayerTalentFrameSoulbind)
-	SoulbindViewer.BackgroundBlackOverlay:SetDrawLayer("BACKGROUND", -1)
-
-	SoulbindViewer.ActivateSoulbindButton:ClearAllPoints()
-	SoulbindViewer.ActivateSoulbindButton:SetPoint("BOTTOM", SoulbindViewer, "BOTTOM", -93, 15)
-
-	SoulbindViewer.SelectGroup:ClearAllPoints()
-	SoulbindViewer.SelectGroup:SetPoint("LEFT", SoulbindViewer, "LEFT", 15, 0)
-end
-
-function SoulbindTalents:RestoreSoulbindFrame()
-	SoulbindViewer:SetParent(UIParent)
-	SoulbindViewer:SetScale(1)
-
-	SoulbindViewer:ClearAllPoints()
-	SoulbindViewer:SetPoint("CENTER")
-
-	SoulbindViewer.CloseButton:Show()
-	SoulbindViewer.Border:Show()
-	SoulbindViewer.ShadowTop:Show()
-	SoulbindViewer.ShadowLeft:Show()
-	SoulbindViewer.ShadowBottom:Show()
-	SoulbindViewer.ShadowRight:Show()
-
-	SoulbindViewer.Background:ClearAllPoints()
-	SoulbindViewer.Background:SetParent(SoulbindViewer)
-	SoulbindViewer.Background:SetPoint("TOPLEFT", SoulbindViewer, "TOPLEFT", 26, -25)
-
-	SoulbindViewer.ConduitList.ScrollBar:ClearAllPoints()
-	SoulbindViewer.ConduitList.ScrollBar:SetPoint("TOPRIGHT", SoulbindViewer.ConduitList, "TOPRIGHT", -6, -36)
-
-	if self.settings.disableFX then
-		SoulbindViewer.Fx:Hide()
-	end
-
-	SoulbindViewer.ActivateFX:ClearAllPoints()
-	SoulbindViewer.ActivateFX:SetPoint("TOPLEFT", SoulbindViewer, "TOPLEFT", 212, -45)
-
-	SoulbindViewer.ActivateFX2:ClearAllPoints()
-	SoulbindViewer.ActivateFX2:SetPoint("TOPLEFT", SoulbindViewer, "TOPLEFT", 212, -45)
-
-	SoulbindViewer.Background2:ClearAllPoints()
-	SoulbindViewer.Background2:SetParent(SoulbindViewer)
-
-	SoulbindViewer.BackgroundBlackOverlay:SetParent(SoulbindViewer)
-	SoulbindViewer.BackgroundBlackOverlay:SetDrawLayer("BACKGROUND", -1)
-
-	SoulbindViewer.ActivateSoulbindButton:ClearAllPoints()
-	SoulbindViewer.ActivateSoulbindButton:SetPoint("TOP", SoulbindViewer, "BOTTOM", -93, 72)
-
-	SoulbindViewer.SelectGroup:ClearAllPoints()
-	SoulbindViewer.SelectGroup:SetPoint("LEFT", SoulbindViewer, "LEFT", 42, 15)
-end
-
-function SoulbindTalents:ShowSoulbindsTab()
-	if not SoulbindViewer:IsShown() then
-		local soulbindID = C_Soulbinds.GetActiveSoulbindID();
-		local soulbindData = C_Soulbinds.GetSoulbindData(soulbindID);
-		local covenantData = C_Covenants.GetCovenantData(soulbindData.covenantID);
-		SoulbindViewer:Init(covenantData, soulbindData);
-
-		self:AppendSoulbindFrame()
-
-		SoulbindViewer:Show();
-	end
-
-	PlayerTalentFrame:SetTitle("Soulbinds")
-	PlayerTalentFrame:SetHeight(588)
-end
-
-function SoulbindTalents:HideSoulbindsTab()
-	if SoulbindViewer:IsShown() then
-		SoulbindViewer:Hide();
-		ItemButtonUtil.TriggerEvent(ItemButtonUtil.Event.ItemContextChanged);
-	end
-	PlayerTalentFrameTab1:Show()
-	PlayerTalentFrameTab2:Show()
-	if self.petTab then
-		PlayerTalentFrameTab3:Show()
-	end
-	if self.soulbindID ~= 0 then
-		PlayerTalentFrameTab4:Show()
-	end
-end
-
 function SoulbindTalents:PlayerTalentFrame_Refresh()
 	if not self.created then
-		if InCombatLockdown() then return end
-
-		local _, playerClass = UnitClass("player");
-		if (playerClass == "HUNTER") then
-			self.petTab = true
-		end
-
-		local PlayerTalentFrameTab4 = CreateFrame("Button", "$parentTab4", PlayerTalentFrame, "PlayerTalentTabTemplate")
+		PlayerTalentFrameTab4 = CreateFrame("Button", "$parentTab4", PlayerTalentFrame, "PlayerTalentTabTemplate", SOULBIND_TAB)
 		PlayerTalentFrameTab4:SetPoint("LEFT", self.petTab and PlayerTalentFrameTab3 or PlayerTalentFrameTab2, "RIGHT", -15, 0)
-		PlayerTalentFrameTab4:SetText("Soulbinds")
-		PlayerTalentFrameTab4:SetID(SOULBIND_TAB)
+		PlayerTalentFrameTab4:SetText(COVENANT_PREVIEW_SOULBINDS)
+		PanelTemplates_TabResize(PlayerTalentFrameTab4, 0, nil, 36, PlayerTalentFrameTab4:GetParent().maxTabWidth or 88);
 
 		PanelTemplates_SetNumTabs(PlayerTalentFrame, 4)
-
-		local PlayerTalentFrameSoulbind = CreateFrame("Frame", "PlayerTalentFrameSoulbind", PlayerTalentFrame)
-		PlayerTalentFrameSoulbind:SetFrameLevel(1)
-		PlayerTalentFrameSoulbind:SetPoint("TOPLEFT", PlayerTalentFrameInset)
-		PlayerTalentFrameSoulbind:SetPoint("BOTTOMRIGHT", PlayerTalentFrameInset)
 
 		if ElvUI then
 			local Engine = unpack(ElvUI)
 			Engine:GetModule('Skins'):HandleTab(PlayerTalentFrameTab4)
 		end
-
 		self.created = true
+	end
+
+	if C_Soulbinds.GetActiveSoulbindID() == 0 then
+		PlayerTalentFrameTab4:SetEnabled(false)
+		PlayerTalentFrameTab4Text:SetFormattedText("|cff808080%s|r", COVENANT_PREVIEW_SOULBINDS)
+	else
+		PlayerTalentFrameTab4:SetEnabled(true)
+		PlayerTalentFrameTab4Text:SetText(COVENANT_PREVIEW_SOULBINDS)
 	end
 
 	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
 
-	if (selectedTab == TALENTS_TAB) then
-		self:HideSoulbindsTab()
-		PlayerTalentFrame:SetHeight(468)
-	elseif (selectedTab == SPECIALIZATION_TAB) then
-		self:HideSoulbindsTab()
-		PlayerTalentFrame:SetHeight(468)
-	elseif (selectedTab == PET_SPECIALIZATION_TAB) then
-		self:HideSoulbindsTab()
-		PlayerTalentFrame:SetHeight(468)
-	elseif (selectedTab == SOULBIND_TAB) then
-		ButtonFrameTemplate_HideAttic(PlayerTalentFrame);
-		PlayerTalentFrame_HideTalentTab();
-		PlayerTalentFrame_HideSpecsTab();
-		PlayerTalentFrame_HidePetSpecTab();
-		self:ShowSoulbindsTab();
-		PlayerTalentFrame_SetExpanded(true);
-		PlayerTalentFrame:SetHeight(588)
+	if (selectedTab == SOULBIND_TAB) then
+		if UIParentLoadAddOn("Blizzard_Soulbinds") then
+			if InCombatLockdown() then
+				PanelTemplates_SetTab(PlayerTalentFrame, 2)
+				return;
+			end
+			HideUIPanel(PlayerTalentFrame)
+			SoulbindViewer:Open()
+		end
 	end
 end
 
-function SoulbindTalents:PlayerTalentFrame_Close()
-	self:HideSoulbindsTab()
-	self:RestoreSoulbindFrame()
-end
-
-function SoulbindTalents:PlayerTalentFrame_OnHide()
-	if not PlayerTalentFrame:IsShown() then
-		self:HideSoulbindsTab()
-		self:RestoreSoulbindFrame()
+function SoulbindTalents:PlayerTalentFrame_Toggle()
+	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
+	if selectedTab == SOULBIND_TAB then
+		if SoulbindViewer:IsShown() and not self.checked then
+			HideUIPanel(SoulbindViewer)
+			self.checked = true
+			return
+		end
+		self.checked = false
 	end
 end
 
 function SoulbindTalents:SoulbindViewer_OnOpen()
-	if not PlayerTalentFrame:IsShown() then
-		ToggleTalentFrame(4)
-	elseif PlayerTalentFrame:IsShown() then
-		local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
-		if (selectedTab ~= SOULBIND_TAB) then
-			PanelTemplates_SetTab(PlayerTalentFrame, 4)
-			self:PlayerTalentFrame_Refresh()
-		end
-	end
-	if C_Soulbinds.CanModifySoulbind() then
-		PlayerTalentFrameTab1:Hide()
-		PlayerTalentFrameTab2:Hide()
+	if not self.created2 then
+		SoulbindAnchor = CreateFrame("Frame", "$parentTabAnchor", UIParent)
+		SoulbindAnchor:SetPoint("BOTTOMLEFT", SoulbindViewer, "BOTTOMLEFT")
+		SoulbindAnchor:SetSize(1, 1)
+		SoulbindAnchor:Show()
+
+		SoulbindViewerTab1 = CreateFrame("Button", "$parentTab1", SoulbindAnchor, "PlayerTalentTabTemplate", 1)
+		SoulbindViewerTab1:SetPoint("TOPLEFT", SoulbindAnchor, "BOTTOMLEFT", 15, 5)
+		SoulbindViewerTab1:SetText(SPECIALIZATION)
+		PanelTemplates_TabResize(SoulbindViewerTab1, 0, nil, 36, SoulbindViewerTab1:GetParent().maxTabWidth or 88);
+
+		SoulbindViewerTab1:HookScript("OnClick", function()
+			UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
+			ShowUIPanel(PlayerTalentFrame)
+		end)
+
+		SoulbindViewerTab2 = CreateFrame("Button", "$parentTab2", SoulbindAnchor, "PlayerTalentTabTemplate", 2)
+		SoulbindViewerTab2:SetPoint("LEFT", SoulbindViewerTab1, "RIGHT", -15, 0)
+		SoulbindViewerTab2:SetText(TALENTS)
+		PanelTemplates_TabResize(SoulbindViewerTab2, 0, nil, 36, SoulbindViewerTab2:GetParent().maxTabWidth or 88);
+
+		SoulbindViewerTab2:HookScript("OnClick", function()
+			UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
+			ShowUIPanel(PlayerTalentFrame)
+		end)
+
 		if self.petTab then
-			PlayerTalentFrameTab3:Hide()
+			SoulbindViewerTab3 = CreateFrame("Button", "$parentTab2", SoulbindAnchor, "PlayerTalentTabTemplate", 3)
+			SoulbindViewerTab3:SetPoint("LEFT", SoulbindViewerTab1, "RIGHT", -15, 0)
+			SoulbindViewerTab3:SetText(TALENTS)
+			PanelTemplates_TabResize(SoulbindViewerTab3, 0, nil, 36, SoulbindViewerTab3:GetParent().maxTabWidth or 88);
+
+			SoulbindViewerTab3:HookScript("OnClick", function()
+				UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
+				ShowUIPanel(PlayerTalentFrame)
+			end)
 		end
-		PlayerTalentFrameTab4:Hide()
+
+		local index = self.petTab and 4 or 3
+
+		SoulbindViewerTab4 = CreateFrame("Button", "$parentTab3", SoulbindAnchor, "PlayerTalentTabTemplate", index)
+		SoulbindViewerTab4:SetPoint("LEFT", SoulbindViewerTab2, "RIGHT", -15, 0)
+		SoulbindViewerTab4:SetText(COVENANT_PREVIEW_SOULBINDS)
+		PanelTemplates_TabResize(SoulbindViewerTab4, 0, nil, 36, SoulbindViewerTab4:GetParent().maxTabWidth or 88);
+
+		PanelTemplates_SetNumTabs(SoulbindAnchor, index)
+		PanelTemplates_SetTab(SoulbindAnchor, index)
+
+		if ElvUI then
+			local Engine = unpack(ElvUI)
+			local Skin = Engine:GetModule('Skins')
+
+			Skin:HandleTab(SoulbindViewerTab1)
+			Skin:HandleTab(SoulbindViewerTab2)
+			Skin:HandleTab(SoulbindViewerTab3)
+			Skin:HandleTab(SoulbindViewerTab4)
+		end
+		self.created2 = true
 	end
+	if PlayerTalentFrame:IsShown() then
+		HideUIPanel(PlayerTalentFrame)
+	end
+	SoulbindViewer:SetScale(self.settings.soulbindScale)
+
+	SoulbindAnchor:Show()
+end
+
+function SoulbindTalents:SoulbindViewer_OnHide()
+	SoulbindAnchor:Hide()
+end
+
+function SoulbindTalents:SoulbindViewer_OnCloseButtonClicked()
+	self.checked = true
 end
 
 local ItemLevelPattern = gsub(ITEM_LEVEL, "%%d", "(%%d+)")
@@ -307,13 +239,13 @@ function SoulbindTalents:ConduitTooltip_Rank(tooltip, rank)
 		end })
 		tooltip.textLeft = textLeft
 	end
-	for i = 2, 5 do
+	for i = 3, 5 do
 		if _G[tooltip:GetName() .. "TextLeft" .. i] then
 			local line = textLeft[i]
 			text = _G[tooltip:GetName() .. "TextLeft" .. i]:GetText() or ""
 			level = string.match(text, ItemLevelPattern)
 			if (level) then
-				line:SetText("Rank " .. rank)
+				line:SetFormattedText("%s (Rank %d)", text, rank);
 				return ;
 			end
 		end
@@ -351,7 +283,7 @@ function SoulbindTalents:ConduitRank(conduit, conduitData)
 		conduit.ConduitName:SetWidth(150);
 
 		conduit.ItemLevel:SetPoint("TOPLEFT", conduit.ConduitName, "BOTTOMLEFT", 0, 0);
-		conduit.ItemLevel:SetText("Rank " .. conduitData.conduitRank);
+		conduit.ItemLevel:SetFormattedText("%s (Rank %d)", conduitData.conduitItemLevel, conduitData.conduitRank);
 		conduit.ItemLevel:SetTextColor(NORMAL_FONT_COLOR:GetRGB());
 	end;
 	item:ContinueOnItemLoad(itemCallback);
@@ -408,32 +340,22 @@ function SoulbindTalents:NodeFX(viewer)
 	end
 end
 
-function SoulbindTalents:SOULBIND_FORGE_INTERACTION_ENDED()
-	self:HideSoulbindsTab()
-	if PlayerTalentFrame:IsShown() then
-		ToggleTalentFrame(4)
-		self:RestoreSoulbindFrame()
-	end
-end
-
-function SoulbindTalents:SOULBIND_ACTIVATED()
-	self.soulbindID = C_Soulbinds.GetActiveSoulbindID();
-	PlayerTalentFrameTab4:SetShown(self.soulbindID ~= 0 and true or false)
-end
-
 function SoulbindTalents:ADDON_LOADED(_, addon)
 	if addon == "Blizzard_TalentUI" then
-		if UIParentLoadAddOn("Blizzard_Soulbinds") then
-			self:SecureHook('PlayerTalentFrame_Refresh')
-			self:SecureHook('PlayerTalentFrame_Close')
-			self:SecureHookScript(PlayerTalentFrame, "OnHide", "PlayerTalentFrame_OnHide")
-		end
+		self:SecureHook('PlayerTalentFrame_Refresh')
+		self:SecureHook('PlayerTalentFrame_Toggle')
 	elseif addon == "Blizzard_Soulbinds" then
 		if UIParentLoadAddOn("Blizzard_TalentUI") then
 			self:SecureHook(SoulbindViewer, "Open", "SoulbindViewer_OnOpen")
 			self:SecureHook(ConduitListConduitButtonMixin, "Init", "ConduitRank")
 			self:SecureHook(SoulbindViewer, "SetSheenAnimationsPlaying", "AnimationFX")
 			self:SecureHook(SoulbindTreeNodeLinkMixin, "SetState", "NodeFX")
+			self:SecureHookScript(SoulbindViewer, "OnHide", function()
+				SoulbindAnchor:Hide()
+			end)
+			self:SecureHookScript(SoulbindViewer.CloseButton, "OnMouseDown", function()
+				self.checked = true
+			end)
 		end
 	end
 end

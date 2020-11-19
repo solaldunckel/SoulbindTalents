@@ -2,6 +2,10 @@
 
 SoulbindTalents will integrate the SoulbindUI directly inside the Talent Frame.
 
+## v1.0.2
+* Rebuilt the code
+* Re-added Item Level along with rank on Tooltips
+
 ## v1.0.1
 * Skin the Soulbind Tab with ElvUI
 * Fix some taint issues

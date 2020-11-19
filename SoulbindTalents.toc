@@ -1,6 +1,6 @@
 ## Interface: 90020
 ## Title: SoulbindTalents
-## Version: 0.1b
+## Version: 1.0.2
 ## Author: jokair9
 ## SavedVariables: SoulbindTalentsDB
 ## Notes: Include Soulbinds in the Player Talent Frame.
