@@ -1,6 +1,6 @@
 # SoulbindTalents
 
-SoulbindTalents will integrate the SoulbindUI directly inside the Talent Frame.
+SoulbindTalents lets you access the Soulbinds UI via the Talent Frame.
 
 ## v1.0.2
 * Rebuilt the code
