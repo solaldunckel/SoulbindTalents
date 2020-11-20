@@ -1,6 +1,7 @@
 ## Interface: 90020
 ## Title: SoulbindTalents
 ## Version: 1.0.2
+## X-Curse-Project-ID: 420381
 ## Author: jokair9
 ## SavedVariables: SoulbindTalentsDB
 ## Notes: Include Soulbinds in the Player Talent Frame.
