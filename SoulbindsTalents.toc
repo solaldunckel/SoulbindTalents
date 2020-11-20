@@ -1,9 +1,9 @@
 ## Interface: 90020
-## Title: SoulbindTalents
+## Title: SoulbindsTalents
 ## Version: 1.0.2
 ## X-Curse-Project-ID: 420381
 ## Author: jokair9
-## SavedVariables: SoulbindTalentsDB
+## SavedVariables: SoulbindsTalentsDB
 ## Notes: Include Soulbinds in the Player Talent Frame.
 
 #@no-lib-strip@
@@ -16,4 +16,4 @@ Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 #@end-no-lib-strip@
 
-SoulbindTalents.lua
+SoulbindsTalents.lua

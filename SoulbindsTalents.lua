@@ -1,4 +1,4 @@
-local _, SoulbindTalents = ...
+local _, SoulbindsTalents = ...
 
 local defaults_settings = {
 	profile = {
@@ -8,10 +8,10 @@ local defaults_settings = {
 	}
 }
 
-SoulbindTalents = LibStub("AceAddon-3.0"):NewAddon(SoulbindTalents, "SoulbindTalents")
+SoulbindsTalents = LibStub("AceAddon-3.0"):NewAddon(SoulbindsTalents, "SoulbindsTalents")
 
-LibStub("AceEvent-3.0"):Embed(SoulbindTalents)
-LibStub("AceHook-3.0"):Embed(SoulbindTalents)
+LibStub("AceEvent-3.0"):Embed(SoulbindsTalents)
+LibStub("AceHook-3.0"):Embed(SoulbindsTalents)
 
 local SOULBIND_TAB = 4
 
@@ -26,8 +26,8 @@ local CONDUIT_RANKS = {
 	[8] = C_Soulbinds.GetConduitItemLevel(0, 8),
 }
 
-function SoulbindTalents:OnEnable()
-	self.db = LibStub("AceDB-3.0"):New("SoulbindTalentsDB", defaults_settings, true)
+function SoulbindsTalents:OnEnable()
+	self.db = LibStub("AceDB-3.0"):New("SoulbindsTalentsDB", defaults_settings, true)
 	self.settings = self.db.profile
 
 	self:SetupOptions()
@@ -46,7 +46,7 @@ function SoulbindTalents:OnEnable()
 	self.previousTab = 1
 end
 
-function SoulbindTalents:SetupOptions()
+function SoulbindsTalents:SetupOptions()
 	self.options = {
 		type = "group",
 		set = function(info, val) self.db.profile[info[#info]] = val end,
@@ -59,7 +59,7 @@ function SoulbindTalents:SetupOptions()
 			},
 			version = {
 				type = "description",
-				name = "|cffffd100Version: |r" .. GetAddOnMetadata("SoulbindTalents", "Version"),
+				name = "|cffffd100Version: |r" .. GetAddOnMetadata("SoulbindsTalents", "Version"),
 				order = 2
 			},
 			title = {
@@ -95,11 +95,11 @@ function SoulbindTalents:SetupOptions()
 		}
 	}
 
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("SoulbindTalents", self.options)
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SoulbindTalents", "SoulbindTalents")
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("SoulbindsTalents", self.options)
+	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SoulbindsTalents", "SoulbindsTalents")
 end
 
-function SoulbindTalents:PlayerTalentFrame_Refresh()
+function SoulbindsTalents:PlayerTalentFrame_Refresh()
 	if not self.created then
 		PlayerTalentFrameTab4 = CreateFrame("Button", "$parentTab4", PlayerTalentFrame, "PlayerTalentTabTemplate", SOULBIND_TAB)
 		PlayerTalentFrameTab4:SetPoint("LEFT", self.petTab and PlayerTalentFrameTab3 or PlayerTalentFrameTab2, "RIGHT", -15, 0)
@@ -137,7 +137,7 @@ function SoulbindTalents:PlayerTalentFrame_Refresh()
 	end
 end
 
-function SoulbindTalents:PlayerTalentFrame_Toggle()
+function SoulbindsTalents:PlayerTalentFrame_Toggle()
 	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
 	if selectedTab == SOULBIND_TAB then
 		if SoulbindViewer:IsShown() and not self.checked then
@@ -149,7 +149,7 @@ function SoulbindTalents:PlayerTalentFrame_Toggle()
 	end
 end
 
-function SoulbindTalents:SoulbindViewer_OnOpen()
+function SoulbindsTalents:SoulbindViewer_OnOpen()
 	if not self.created2 then
 		SoulbindAnchor = CreateFrame("Frame", "$parentTabAnchor", UIParent)
 		SoulbindAnchor:SetPoint("BOTTOMLEFT", SoulbindViewer, "BOTTOMLEFT")
@@ -217,17 +217,17 @@ function SoulbindTalents:SoulbindViewer_OnOpen()
 	SoulbindAnchor:Show()
 end
 
-function SoulbindTalents:SoulbindViewer_OnHide()
+function SoulbindsTalents:SoulbindViewer_OnHide()
 	SoulbindAnchor:Hide()
 end
 
-function SoulbindTalents:SoulbindViewer_OnCloseButtonClicked()
+function SoulbindsTalents:SoulbindViewer_OnCloseButtonClicked()
 	self.checked = true
 end
 
 local ItemLevelPattern = gsub(ITEM_LEVEL, "%%d", "(%%d+)")
 
-function SoulbindTalents:ConduitTooltip_Rank(tooltip, rank)
+function SoulbindsTalents:ConduitTooltip_Rank(tooltip, rank)
 	local text, level
 	local textLeft = tooltip.textLeft
 	if not textLeft then
@@ -252,7 +252,7 @@ function SoulbindTalents:ConduitTooltip_Rank(tooltip, rank)
 	end
 end
 
-function SoulbindTalents:TooltipHook(tooltip)
+function SoulbindsTalents:TooltipHook(tooltip)
 	if not self.settings.conduitTooltipRank then return end
 
 	local name, itemLink = tooltip:GetItem()
@@ -269,7 +269,7 @@ function SoulbindTalents:TooltipHook(tooltip)
 	end
 end
 
-function SoulbindTalents:ConduitRank(conduit, conduitData)
+function SoulbindsTalents:ConduitRank(conduit, conduitData)
 	local itemID = conduitData.conduitItemID;
 	local item = Item:CreateFromItemID(itemID);
 	local itemCallback = function()
@@ -317,7 +317,7 @@ function SoulbindTalents:ConduitRank(conduit, conduitData)
 	conduit:Update();
 end
 
-function SoulbindTalents:AnimationFX(viewer)
+function SoulbindsTalents:AnimationFX(viewer)
 	if self.settings.disableFX then
 		viewer.ForgeSheen.Anim:SetPlaying(false);
 		viewer.BackgroundSheen1.Anim:SetPlaying(false);
@@ -329,7 +329,7 @@ function SoulbindTalents:AnimationFX(viewer)
 	end
 end
 
-function SoulbindTalents:NodeFX(viewer)
+function SoulbindsTalents:NodeFX(viewer)
 	if self.settings.disableFX then
 		viewer.FlowAnim1:Stop();
 		viewer.FlowAnim2:Stop();
@@ -340,7 +340,7 @@ function SoulbindTalents:NodeFX(viewer)
 	end
 end
 
-function SoulbindTalents:ADDON_LOADED(_, addon)
+function SoulbindsTalents:ADDON_LOADED(_, addon)
 	if addon == "Blizzard_TalentUI" then
 		self:SecureHook('PlayerTalentFrame_Refresh')
 		self:SecureHook('PlayerTalentFrame_Toggle')

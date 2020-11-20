@@ -1,4 +1,4 @@
-package-as: SoulbindTalents
+package-as: SoulbindsTalents
 
 externals:
     Libs/LibStub: https://repos.wowace.com/wow/libstub/trunk

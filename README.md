@@ -1,6 +1,6 @@
-# SoulbindTalents
+# SoulbindsTalents
 
-SoulbindTalents lets you access the Soulbinds UI via the Talent Frame.
+SoulbindsTalents lets you access the Soulbinds UI via the Talent Frame.
 
 ## v1.0.2
 * Rebuilt the code

@@ -121,6 +121,7 @@ globals = {
 	"ShowUIPanel",
 	"SoulbindAnchor",
 	"SoulbindViewer",
+	"SoulbindsTalents",
 	"SoulbindViewerTab1",
 	"SoulbindViewerTab2",
 	"SoulbindViewerTab3",
