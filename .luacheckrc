@@ -128,6 +128,7 @@ globals = {
 	"SoulbindViewerTab4",
 	"SoulbindConduitNodeMixin",
 	"SoulbindTreeNodeLinkMixin",
+	"StaticPopup_Show",
 	"ToggleTalentFrame",
 	"UIParent",
 	"UIParentLoadAddOn",
