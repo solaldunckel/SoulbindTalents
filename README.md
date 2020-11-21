@@ -2,6 +2,10 @@
 
 SoulbindsTalents lets you access the Soulbinds UI via the Talent Frame.
 
+## v1.0.3
+* TOC mistake
+* Renamed to 'SoulbindsTalents'
+
 ## v1.0.2
 * Rebuilt the code
 * Re-added Item Level along with rank on Tooltips
