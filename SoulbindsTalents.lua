@@ -125,16 +125,27 @@ function SoulbindsTalents:PlayerTalentFrame_Refresh()
 
 	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
 
+	if InCombatLockdown() then
+		PlayerTalentFrameTab4:SetEnabled(false)
+		PlayerTalentFrameTab4Text:SetFormattedText("|cff808080%s|r", COVENANT_PREVIEW_SOULBINDS)
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", function(event)
+			PlayerTalentFrameTab4:SetEnabled(true)
+			PlayerTalentFrameTab4Text:SetText(COVENANT_PREVIEW_SOULBINDS)
+			self:UnregisterEvent(event)
+		end)
+	end
+
 	if (selectedTab == SOULBIND_TAB) then
 		if UIParentLoadAddOn("Blizzard_Soulbinds") then
 			if InCombatLockdown() then
-				PanelTemplates_SetTab(PlayerTalentFrame, 2)
+				PanelTemplates_SetTab(PlayerTalentFrame, self.previousTab)
 				return;
 			end
 			HideUIPanel(PlayerTalentFrame)
 			SoulbindViewer:Open()
 		end
 	end
+	self.previousTab = selectedTab
 end
 
 function SoulbindsTalents:PlayerTalentFrame_Toggle()
@@ -146,6 +157,19 @@ function SoulbindsTalents:PlayerTalentFrame_Toggle()
 			return
 		end
 		self.checked = false
+	end
+end
+
+function SoulbindsTalents:SoulbindViewer_ChangeTab()
+	if C_Soulbinds.HasAnyPendingConduits() then
+		local onConfirm = function()
+			UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
+			ShowUIPanel(PlayerTalentFrame)
+		end;
+		StaticPopup_Show("SOULBIND_CONDUIT_NO_CHANGES_CONFIRMATION", nil, nil, onConfirm);
+	else
+		UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
+		ShowUIPanel(PlayerTalentFrame)
 	end
 end
 
@@ -162,8 +186,7 @@ function SoulbindsTalents:SoulbindViewer_OnOpen()
 		PanelTemplates_TabResize(SoulbindViewerTab1, 0, nil, 36, SoulbindViewerTab1:GetParent().maxTabWidth or 88);
 
 		SoulbindViewerTab1:HookScript("OnClick", function()
-			UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
-			ShowUIPanel(PlayerTalentFrame)
+			SoulbindsTalents:SoulbindViewer_ChangeTab()
 		end)
 
 		SoulbindViewerTab2 = CreateFrame("Button", "$parentTab2", SoulbindAnchor, "PlayerTalentTabTemplate", 2)
@@ -172,8 +195,7 @@ function SoulbindsTalents:SoulbindViewer_OnOpen()
 		PanelTemplates_TabResize(SoulbindViewerTab2, 0, nil, 36, SoulbindViewerTab2:GetParent().maxTabWidth or 88);
 
 		SoulbindViewerTab2:HookScript("OnClick", function()
-			UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
-			ShowUIPanel(PlayerTalentFrame)
+			SoulbindsTalents:SoulbindViewer_ChangeTab()
 		end)
 
 		if self.petTab then
@@ -183,8 +205,7 @@ function SoulbindsTalents:SoulbindViewer_OnOpen()
 			PanelTemplates_TabResize(SoulbindViewerTab3, 0, nil, 36, SoulbindViewerTab3:GetParent().maxTabWidth or 88);
 
 			SoulbindViewerTab3:HookScript("OnClick", function()
-				UIPanelCloseButton_OnClick(SoulbindViewer.CloseButton);
-				ShowUIPanel(PlayerTalentFrame)
+				SoulbindsTalents:SoulbindViewer_ChangeTab()
 			end)
 		end
 
@@ -350,9 +371,7 @@ function SoulbindsTalents:ADDON_LOADED(_, addon)
 			self:SecureHook(ConduitListConduitButtonMixin, "Init", "ConduitRank")
 			self:SecureHook(SoulbindViewer, "SetSheenAnimationsPlaying", "AnimationFX")
 			self:SecureHook(SoulbindTreeNodeLinkMixin, "SetState", "NodeFX")
-			self:SecureHookScript(SoulbindViewer, "OnHide", function()
-				SoulbindAnchor:Hide()
-			end)
+			self:SecureHookScript(SoulbindViewer, "OnHide", "SoulbindViewer_OnHide")
 			self:SecureHookScript(SoulbindViewer.CloseButton, "OnMouseDown", function()
 				self.checked = true
 			end)
