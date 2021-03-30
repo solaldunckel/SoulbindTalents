@@ -199,25 +199,29 @@ function SoulbindsTalents:SoulbindViewer_OnOpen()
 		end)
 
 		if self.petTab then
-			SoulbindViewerTab3 = CreateFrame("Button", "$parentTab2", SoulbindAnchor, "PlayerTalentTabTemplate", 3)
-			SoulbindViewerTab3:SetPoint("LEFT", SoulbindViewerTab1, "RIGHT", -15, 0)
-			SoulbindViewerTab3:SetText(TALENTS)
+			SoulbindViewerTab3 = CreateFrame("Button", "$parentTab3", SoulbindAnchor, "PlayerTalentTabTemplate", 3)
+			SoulbindViewerTab3:SetPoint("LEFT", SoulbindViewerTab2, "RIGHT", -15, 0)
+			SoulbindViewerTab3:SetText(PET)
 			PanelTemplates_TabResize(SoulbindViewerTab3, 0, nil, 36, SoulbindViewerTab3:GetParent().maxTabWidth or 88);
 
 			SoulbindViewerTab3:HookScript("OnClick", function()
 				SoulbindsTalents:SoulbindViewer_ChangeTab()
 			end)
+
+			SoulbindViewerTab4 = CreateFrame("Button", "$parentTab4", SoulbindAnchor, "PlayerTalentTabTemplate", 4)
+			SoulbindViewerTab4:SetPoint("LEFT", SoulbindViewerTab3, "RIGHT", -15, 0)
+			SoulbindViewerTab4:SetText(COVENANT_PREVIEW_SOULBINDS)
+			PanelTemplates_TabResize(SoulbindViewerTab4, 0, nil, 36, SoulbindViewerTab4:GetParent().maxTabWidth or 88);
+			PanelTemplates_SetNumTabs(SoulbindAnchor, 4)
+			PanelTemplates_SetTab(SoulbindAnchor, 4)
+		else
+			SoulbindViewerTab3 = CreateFrame("Button", "$parentTab3", SoulbindAnchor, "PlayerTalentTabTemplate", 3)
+			SoulbindViewerTab3:SetPoint("LEFT", SoulbindViewerTab2, "RIGHT", -15, 0)
+			SoulbindViewerTab3:SetText(COVENANT_PREVIEW_SOULBINDS)
+			PanelTemplates_TabResize(SoulbindViewerTab3, 0, nil, 36, SoulbindViewerTab3:GetParent().maxTabWidth or 88);
+			PanelTemplates_SetNumTabs(SoulbindAnchor, 3)
+			PanelTemplates_SetTab(SoulbindAnchor, 3)
 		end
-
-		local index = self.petTab and 4 or 3
-
-		SoulbindViewerTab4 = CreateFrame("Button", "$parentTab3", SoulbindAnchor, "PlayerTalentTabTemplate", index)
-		SoulbindViewerTab4:SetPoint("LEFT", SoulbindViewerTab2, "RIGHT", -15, 0)
-		SoulbindViewerTab4:SetText(COVENANT_PREVIEW_SOULBINDS)
-		PanelTemplates_TabResize(SoulbindViewerTab4, 0, nil, 36, SoulbindViewerTab4:GetParent().maxTabWidth or 88);
-
-		PanelTemplates_SetNumTabs(SoulbindAnchor, index)
-		PanelTemplates_SetTab(SoulbindAnchor, index)
 
 		if ElvUI then
 			local Engine = unpack(ElvUI)
