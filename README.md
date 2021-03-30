@@ -2,6 +2,10 @@
 
 SoulbindsTalents lets you access the Soulbinds UI via the Talent Frame.
 
+## v1.0.4
+* TOC update
+* Fix issue with the Pet tab (thx HonorWOW)
+
 ## v1.0.3
 * TOC mistake
 * Renamed to 'SoulbindsTalents'
