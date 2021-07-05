@@ -2,6 +2,9 @@
 
 SoulbindsTalents lets you access the Soulbinds UI via the Talent Frame.
 
+## v1.0.6
+* TOC update
+
 ## v1.0.5
 * TOC update
 

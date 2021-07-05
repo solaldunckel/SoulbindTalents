@@ -4,7 +4,7 @@ local defaults_settings = {
 	profile = {
 		disableFX = false,
 		conduitTooltipRank = true,
-		soulbindScale = 1,
+		soulbindScale = 0.8,
 	}
 }
 
@@ -345,8 +345,6 @@ end
 function SoulbindsTalents:AnimationFX(viewer)
 	if self.settings.disableFX then
 		viewer.ForgeSheen.Anim:SetPlaying(false);
-		viewer.BackgroundSheen1.Anim:SetPlaying(false);
-		viewer.BackgroundSheen2.Anim:SetPlaying(false);
 		viewer.GridSheen.Anim:SetPlaying(false);
 		viewer.BackgroundRuneLeft.Anim:SetPlaying(false);
 		viewer.BackgroundRuneRight.Anim:SetPlaying(false);
