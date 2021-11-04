@@ -1,6 +1,6 @@
-## Interface: 90100
+## Interface: 90105
 ## Title: SoulbindsTalents
-## Version: 1.0.6
+## Version: 1.0.7
 ## X-Curse-Project-ID: 420381
 ## Author: jokair9
 ## SavedVariables: SoulbindsTalentsDB
